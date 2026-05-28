@@ -72,11 +72,11 @@ questions = [
 @app.route("/")
 def home():
 
-    # Reset score and question index
+    # Reset quiz session
     session["score"] = 0
     session["question_index"] = 0
 
-    # Shuffle questions
+    # Shuffle questions each time
     random.shuffle(questions)
 
     return render_template("index.html")
@@ -87,34 +87,40 @@ def home():
 def quiz():
 
     question_index = session.get("question_index", 0)
+
     score = session.get("score", 0)
 
-    # If form submitted
+    # Handle Answer Submission
     if request.method == "POST":
 
         selected_option = request.form.get("answer")
 
         current_question = questions[question_index]
 
-        # Check answer
+        # Check if answer is correct
         if selected_option == current_question["answer"]:
 
             score += 1
+
             session["score"] = score
 
         # Move to next question
         question_index += 1
+
         session["question_index"] = question_index
 
-    # If quiz completed
+    # Quiz Finished
     if question_index >= len(questions):
 
         return redirect(url_for("result"))
 
     current_question = questions[question_index]
 
+    # Progress Bar Percentage
     progress = int(
+
         ((question_index + 1) / len(questions)) * 100
+
     )
 
     return render_template(
@@ -139,9 +145,13 @@ def result():
 
     total_questions = len(questions)
 
-    percentage = int((score / total_questions) * 100)
+    percentage = int(
 
-    # Performance Message
+        (score / total_questions) * 100
+
+    )
+
+    # Performance Messages
     if percentage >= 80:
 
         message = "Excellent Performance 🚀"
@@ -177,7 +187,7 @@ def restart():
     return redirect(url_for("home"))
 
 
-# Run App
+# Run Flask App
 if __name__ == "__main__":
 
-    app.run(debug=True)
+    app.run(host="0.0.0.0", port=5000)
